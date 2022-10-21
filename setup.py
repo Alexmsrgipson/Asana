@@ -8,10 +8,20 @@ assert sys.version_info >= (2, 7), 'We only support Python 2.7+'
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'asana'))
 
+# Safely read the version number from the version.py file
+version = {}
+with open('asana/version.py') as fp:
+    exec(fp.read(), version)
+
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
+    long_description = readme.read()
+
 setup(
     name='asana',
-    version='0.9.1',
+    version=version['__version__'],
     description='Asana API client',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     license='MIT',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -27,7 +37,7 @@ setup(
     ],
     install_requires=[
         'requests >= 2.20.0, == 2.*',
-        'requests_oauthlib >= 0.8.0, == 0.8.*',
+        'requests_oauthlib >= 0.8.0, <2.0',
         'six >= 1.10, == 1.*'
     ],
     author='Asana, Inc',

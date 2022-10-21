@@ -1,114 +1,76 @@
-
+# coding=utf-8
 class _Workspaces:
-    """A _workspace_ is the highest-level organizational unit in Asana. All projects
-    and tasks have an associated workspace.
-    
-    An _organization_ is a special kind of workspace that represents a company.
-    In an organization, you can group your projects into teams. You can read
-    more about how organizations work on the Asana Guide.
-    To tell if your workspace is an organization or not, check its
-    `is_organization` property.
-    
-    Over time, we intend to migrate most workspaces into organizations and to
-    release more organization-specific functionality. We may eventually deprecate
-    using workspace-based APIs for organizations. Currently, and until after
-    some reasonable grace period following any further announcements, you can
-    still reference organizations in any `workspace` parameter.
-    """
 
     def __init__(self, client=None):
         self.client = client
-  
-    def find_by_id(self, workspace, params={}, **options): 
-        """Returns the full workspace record for a single workspace.
 
-        Parameters
-        ----------
-        workspace : {Id} Globally unique identifier for the workspace or organization.
-        [params] : {Object} Parameters for the request
+    def add_user_for_workspace(self, workspace_gid, params=None, **options):
+        """Add a user to a workspace or organization
+        :param str workspace_gid: (required) Globally unique identifier for the workspace or organization.
+        :param Object params: Parameters for the request
+        :param **options
+            - opt_fields {list[str]}:  Defines fields to return. Some requests return *compact* representations of objects in order to conserve resources and complete the request more efficiently. Other times requests return more information than you may need. This option allows you to list the exact set of fields that the API should be sure to return for the objects. The field names should be provided as paths, described below. The id of included objects will always be returned, regardless of the field options.
+            - opt_pretty {bool}:  Provides “pretty” output. Provides the response in a “pretty” format. In the case of JSON this means doing proper line breaking and indentation to make it readable. This will take extra time and increase the response size so it is advisable only to use this during debugging.
+        :return: Object
         """
-        path = "/workspaces/%s" % (workspace)
+        if params is None:
+            params = {}
+        path = "/workspaces/{workspace_gid}/addUser".replace("{workspace_gid}", workspace_gid)
+        return self.client.post(path, params, **options)
+
+    def get_workspace(self, workspace_gid, params=None, **options):
+        """Get a workspace
+        :param str workspace_gid: (required) Globally unique identifier for the workspace or organization.
+        :param Object params: Parameters for the request
+        :param **options
+            - opt_fields {list[str]}:  Defines fields to return. Some requests return *compact* representations of objects in order to conserve resources and complete the request more efficiently. Other times requests return more information than you may need. This option allows you to list the exact set of fields that the API should be sure to return for the objects. The field names should be provided as paths, described below. The id of included objects will always be returned, regardless of the field options.
+            - opt_pretty {bool}:  Provides “pretty” output. Provides the response in a “pretty” format. In the case of JSON this means doing proper line breaking and indentation to make it readable. This will take extra time and increase the response size so it is advisable only to use this during debugging.
+        :return: Object
+        """
+        if params is None:
+            params = {}
+        path = "/workspaces/{workspace_gid}".replace("{workspace_gid}", workspace_gid)
         return self.client.get(path, params, **options)
-        
-    def find_all(self, params={}, **options): 
-        """Returns the compact records for all workspaces visible to the authorized user.
 
-        Parameters
-        ----------
-        [params] : {Object} Parameters for the request
+    def get_workspaces(self, params=None, **options):
+        """Get multiple workspaces
+        :param Object params: Parameters for the request
+        :param **options
+            - offset {str}:  Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. 'Note: You can only pass in an offset that was returned to you via a previously paginated request.'
+            - limit {int}:  Results per page. The number of objects to return per page. The value must be between 1 and 100.
+            - opt_fields {list[str]}:  Defines fields to return. Some requests return *compact* representations of objects in order to conserve resources and complete the request more efficiently. Other times requests return more information than you may need. This option allows you to list the exact set of fields that the API should be sure to return for the objects. The field names should be provided as paths, described below. The id of included objects will always be returned, regardless of the field options.
+            - opt_pretty {bool}:  Provides “pretty” output. Provides the response in a “pretty” format. In the case of JSON this means doing proper line breaking and indentation to make it readable. This will take extra time and increase the response size so it is advisable only to use this during debugging.
+        :return: Object
         """
-        return self.client.get_collection("/workspaces", params, **options)
-        
-    def update(self, workspace, params={}, **options): 
-        """A specific, existing workspace can be updated by making a PUT request on
-        the URL for that workspace. Only the fields provided in the data block
-        will be updated; any unspecified fields will remain unchanged.
-        
-        Currently the only field that can be modified for a workspace is its `name`.
-        
-        Returns the complete, updated workspace record.
-
-        Parameters
-        ----------
-        workspace : {Id} The workspace to update.
-        [data] : {Object} Data for the request
-        """
-        path = "/workspaces/%s" % (workspace)
-        return self.client.put(path, params, **options)
-        
-    def typeahead(self, workspace, params={}, **options): 
-        """Retrieves objects in the workspace based on an auto-completion/typeahead
-        search algorithm. This feature is meant to provide results quickly, so do
-        not rely on this API to provide extremely accurate search results. The
-        result set is limited to a single page of results with a maximum size,
-        so you won't be able to fetch large numbers of results.
-
-        Parameters
-        ----------
-        workspace : {Id} The workspace to fetch objects from.
-        [params] : {Object} Parameters for the request
-          - resource_type : {Enum} The type of values the typeahead should return. You can choose from
-          one of the following: custom_field, project, tag, task, and user.
-          Note that unlike in the names of endpoints, the types listed here are
-          in singular form (e.g. `task`). Using multiple types is not yet supported.
-          - [type] : {Enum} **Deprecated: new integrations should prefer the resource_type field.**
-          - [query] : {String} The string that will be used to search for relevant objects. If an
-          empty string is passed in, the API will currently return an empty
-          result set.
-          - [count] : {Number} The number of results to return. The default is `20` if this
-          parameter is omitted, with a minimum of `1` and a maximum of `100`.
-          If there are fewer results found than requested, all will be returned.
-        """
-        path = "/workspaces/%s/typeahead" % (workspace)
+        if params is None:
+            params = {}
+        path = "/workspaces"
         return self.client.get_collection(path, params, **options)
-        
-    def add_user(self, workspace, params={}, **options): 
-        """The user can be referenced by their globally unique user ID or their email address.
-        Returns the full user record for the invited user.
 
-        Parameters
-        ----------
-        workspace : {Id} The workspace or organization to invite the user to.
-        [data] : {Object} Data for the request
-          - user : {String} An identifier for the user. Can be one of an email address,
-          the globally unique identifier for the user, or the keyword `me`
-          to indicate the current user making the request.
+    def remove_user_for_workspace(self, workspace_gid, params=None, **options):
+        """Remove a user from a workspace or organization
+        :param str workspace_gid: (required) Globally unique identifier for the workspace or organization.
+        :param Object params: Parameters for the request
+        :param **options
+            - opt_fields {list[str]}:  Defines fields to return. Some requests return *compact* representations of objects in order to conserve resources and complete the request more efficiently. Other times requests return more information than you may need. This option allows you to list the exact set of fields that the API should be sure to return for the objects. The field names should be provided as paths, described below. The id of included objects will always be returned, regardless of the field options.
+            - opt_pretty {bool}:  Provides “pretty” output. Provides the response in a “pretty” format. In the case of JSON this means doing proper line breaking and indentation to make it readable. This will take extra time and increase the response size so it is advisable only to use this during debugging.
+        :return: Object
         """
-        path = "/workspaces/%s/addUser" % (workspace)
+        if params is None:
+            params = {}
+        path = "/workspaces/{workspace_gid}/removeUser".replace("{workspace_gid}", workspace_gid)
         return self.client.post(path, params, **options)
-        
-    def remove_user(self, workspace, params={}, **options): 
-        """The user making this call must be an admin in the workspace.
-        Returns an empty data record.
 
-        Parameters
-        ----------
-        workspace : {Id} The workspace or organization to invite the user to.
-        [data] : {Object} Data for the request
-          - user : {String} An identifier for the user. Can be one of an email address,
-          the globally unique identifier for the user, or the keyword `me`
-          to indicate the current user making the request.
+    def update_workspace(self, workspace_gid, params=None, **options):
+        """Update a workspace
+        :param str workspace_gid: (required) Globally unique identifier for the workspace or organization.
+        :param Object params: Parameters for the request
+        :param **options
+            - opt_fields {list[str]}:  Defines fields to return. Some requests return *compact* representations of objects in order to conserve resources and complete the request more efficiently. Other times requests return more information than you may need. This option allows you to list the exact set of fields that the API should be sure to return for the objects. The field names should be provided as paths, described below. The id of included objects will always be returned, regardless of the field options.
+            - opt_pretty {bool}:  Provides “pretty” output. Provides the response in a “pretty” format. In the case of JSON this means doing proper line breaking and indentation to make it readable. This will take extra time and increase the response size so it is advisable only to use this during debugging.
+        :return: Object
         """
-        path = "/workspaces/%s/removeUser" % (workspace)
-        return self.client.post(path, params, **options)
-        
+        if params is None:
+            params = {}
+        path = "/workspaces/{workspace_gid}".replace("{workspace_gid}", workspace_gid)
+        return self.client.put(path, params, **options)

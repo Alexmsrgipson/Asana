@@ -1,40 +1,6 @@
-# asana [![Build Status][travis-image]][travis-url] [![PyPi Version][pypi-image]][pypi-url]
+# asana [![Build][github-actions-image]][github-actions-url] [![PyPi Version][pypi-image]][pypi-url]
 
 Python client library for Asana.
-
-Required: Security procedures for outdated OpenSSL versions
---------------
-
-Older versions of OpenSSL can cause a problem when using `python-asana` In particular, at the time of this writing, at least **MacOS X 10.11 and below** ship with a very old version of OpenSSL:
-    
-    $ openssl version
-    OpenSSL 0.9.8zh 14 Jan 2016
-
-OpenSSL 0.9.8 was first released in 2005, and therefore only supports TLS (Transport Layer Security) version 1.0. Asana has deprecated and stopped accepting requests for clients which do not suport [TLS 1.0 and above](https://asa.na/tls), which unfortunately includes any software linked against this version of the library - this includes both the MacOS X provided Python interpreter and any homebrew installed Python that is not specifically configured to link against a newer version.
-
-To see if your Python version is affected, run
-   
-    $ python -c "import ssl; print ssl.OPENSSL_VERSION"
-
-If the version printed at the command line is older than `1.0.1`, when, in 2012, OpenSSL first supported TLS 1.1 and 1.2, you will not be able to use `python-asana` to connect to Asana. Specifically, you will recieve `400 Bad Request` responses with an error message in the response body about the lack of support for TLS 1.1 and above.
-
-Fortunately, homebrew makes it easy to install both an updated OpenSSL and a Python interpreter that links to it. Run
-
-    $ brew install openssl
-      ...                                               # homebrew installs
-    $ /usr/local/Cellar/openssl/*/bin/openssl version   # Just to verify...
-    OpenSSL 1.0.2h  3 May 2016
-
-Finally, you have to install the homebrew version of python which links against the newer OpenSSL
-
-    $ brew install python --with-brewed-openssl
-      ...                                                 # homebrew installs
-    $ python -c "import ssl; print ssl.OPENSSL_VERSION"   # Verify inside Python
-    OpenSSL 1.0.2h  3 May 2016
-
-If you see the version of OpenSSL greater than OpenSSL 1.0.1, then you're all set to start using `python-asana`
-
-Similarly, if you're not using a homebrew version of Python (e.g. using macports or manually compiling) you'll have to make sure that your installation of Python is using an up-to-date version of OpenSSL. **Note**: this does _not_ apply to using `virtualenv`; `virtualenv` manages Python packages, but uses the system python and its standard library packages, including OpenSSL.
 
 Authentication
 --------------
@@ -81,9 +47,9 @@ Methods that return a single object return that object directly:
     me = client.users.me()
     print "Hello " + me['name']
 
-    workspace_id = me['workspaces'][0]['id']
+    workspace_id = me['workspaces'][0]['gid']
     project = client.projects.create_in_workspace(workspace_id, { 'name': 'new project' })
-    print "Created project with id: " + project['id']
+    print "Created project with id: " + project['gid']
 
 Methods that return multiple items (e.x. `find_all`) return a page iterator by default. See the "Collections" section.
 
@@ -95,7 +61,7 @@ Options
 Various options can be set globally on the `Client.DEFAULTS` object, per-client on `client.options`, or per-request as additional named arguments. For example:
 
     # global:
-    asana.Client.DEFAULTS['page_size'] = 100
+    asana.Client.DEFAULT_OPTIONS['page_size'] = 100
 
     # per-client:
     client.options['page_size'] = 100
@@ -180,7 +146,7 @@ lint and tests.
 ### Code generation
 
 The specific Asana resource classes under `gen` (`_Tag`, `_Workspace`, `_Task`, etc) are
-generated code, hence they shouldn't be modified by hand. See the [asana-api-meta][meta] repo for details.
+generated code, hence they shouldn't be modified by hand.
 
 ### Deployment
 
@@ -188,23 +154,25 @@ generated code, hence they shouldn't be modified by hand. See the [asana-api-met
 
 #### Automatic Deployment
 
-Run `deploy.py [version]`. See `deploy.py -h` for additional info.
+Run `deploy.py [major|minor|patch]`. See `deploy.py -h` for additional info.
 
 #### Manual Deployment
 
   1. Merge in the desired changes into the `master` branch and commit them.
   2. Clone the repo, work on master.
-  3. Edit package version in `asana/__init__.py` to indicate the [semantic version](http://semver.org/) change.
+  3. Edit package version in `asana/__init__.py` and `./VERSION` to indicate the [semantic version](http://semver.org/) change.
   4. Commit the change
   5. Tag the commit with `v` plus the same version number you set in the file.
      `git tag v1.2.3`
   6. Push changes to origin, including tags:
      `git push origin master --tags`
 
-Travis CI will automatically build and deploy the tagged release to `pypi`.
+GitHub Actions will automatically build and deploy the tagged release to [PyPI](https://pypi.org/).
 
-[travis-url]: http://travis-ci.org/Asana/python-asana
-[travis-image]: https://api.travis-ci.org/Asana/python-asana.svg?style=flat-square&branch=master
+[github-actions-url]: https://github.com/Asana/python-asana/actions
+[github-actions-image]: https://github.com/Asana/python-asana/workflows/Build/badge.svg
 
 [pypi-url]: https://pypi.python.org/pypi/asana/
 [pypi-image]: https://img.shields.io/pypi/v/asana.svg?style=flat-square
+
+[asana-docs]: https://developers.asana.com/docs
